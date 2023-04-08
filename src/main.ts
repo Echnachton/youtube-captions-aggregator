@@ -2,23 +2,16 @@ import "reflect-metadata";
 import * as dotenv from "dotenv";
 import { container, registerDependencies, tokens } from "./utils";
 import type { ICredentialService } from "./services/credentialService";
-import type { IYouTubeService } from "./services/youtubeService";
-import type { IApplicationParameters } from "./services/applicationParameters";
 import mongoose from "mongoose";
+import type { IYouTubeController } from "./controllers/youtubeController";
 dotenv.config();
 
 async function main() {
     // Initialization
-    try {
-        init();
-    } catch(e) {
-        throw new Error(e);
-    }
+    init();
 
-    const applicationParameters = container.get<IApplicationParameters>(tokens.ApplicationParams);
-    const youtubeService = container.get<IYouTubeService>(tokens.YouTubeService);
-    const res = await youtubeService.getVideos(applicationParameters.youtubePlaylistItemsParams);
-    console.log(res);
+    const youtubeController = container.get<IYouTubeController>(tokens.YouTubeController);
+    youtubeController.updateVideoList(true);
 }
 
 // Run at start of app
@@ -30,7 +23,7 @@ async function init(): Promise<void> {
     try {
         await mongoose.connect(process.env.DB_CONNECTION_STRING);
     } catch {
-        throw new Error('Failed to connect to db');
+        console.error('Failed to connect to db');
     }
 
     // Sets youtube api handler
