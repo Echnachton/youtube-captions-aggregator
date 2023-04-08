@@ -4,7 +4,7 @@
 import type { youtubePlaylistItemsParams } from "../types/common";
 
 export const artePlaylistItemsParams: youtubePlaylistItemsParams = {
-        part: ["snippet"],
+        part: ["snippet", "contentDetails"],
         maxResults: 50,
         playlistId: "UUwI-JbGNsojunnHbFAc0M4Q"
 }
