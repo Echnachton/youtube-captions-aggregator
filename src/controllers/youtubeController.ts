@@ -5,7 +5,7 @@ import type { IApplicationParameters } from "../services/applicationParameters";
 import { youtube_v3 } from "googleapis";
 import { Video } from "../models/Video";
 import { GaxiosPromise, GaxiosResponse } from "gaxios";
-import type { youtubePlaylistItemsParams } from "../../types/common";
+import type { youtubePlaylistItemsParams } from "../types/common";
 import * as readline from "readline";
 
 export interface IYouTubeController {
@@ -30,6 +30,7 @@ export class YouTubeController implements IYouTubeController {
             initialList = await this.fetchInitialList();
         } catch (e) {
             console.error(e);
+            process.exit(1);
         }
 
         try {
@@ -37,6 +38,7 @@ export class YouTubeController implements IYouTubeController {
             this.count();
         } catch (e) {
             console.error(e);
+            process.exit(1);
         }
 
         try {
@@ -49,6 +51,7 @@ export class YouTubeController implements IYouTubeController {
             }
         } catch (e) {
             console.error(e);
+            process.exit(1);
         }
     }
 

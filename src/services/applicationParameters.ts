@@ -1,7 +1,7 @@
 // Contains all the configuration parameters required in this app.
 
 import { injectable } from "inversify";
-import { youtubePlaylistItemsParams } from "../../types/common";
+import { youtubePlaylistItemsParams } from "../types/common";
 import { playlistItemsParams } from "../config";
 
 export interface IApplicationParameters {

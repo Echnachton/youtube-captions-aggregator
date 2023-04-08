@@ -5,7 +5,7 @@ import { tokens } from "../utils"
 import type { ICredentialService } from "./credentialService";
 import type { youtube_v3 } from "googleapis";
 import { GaxiosPromise } from "googleapis/build/src/apis/abusiveexperiencereport";
-import type { youtubePlaylistItemsParams } from "../../types/common";
+import type { youtubePlaylistItemsParams } from "../types/common";
 
 export interface IYouTubeService {
     getVideos: (params: youtubePlaylistItemsParams) => GaxiosPromise<youtube_v3.Schema$PlaylistItemListResponse>
