@@ -8,7 +8,7 @@ dotenv.config();
 
 async function main() {
     // Initialization
-    init();
+    await init();
 
     const youtubeController = container.get<IYouTubeController>(tokens.YouTubeController);
     youtubeController.updateVideoList(true);
@@ -24,6 +24,7 @@ async function init(): Promise<void> {
         await mongoose.connect(process.env.DB_CONNECTION_STRING);
     } catch {
         console.error('Failed to connect to db');
+        process.exit(1);
     }
 
     // Sets youtube api handler
