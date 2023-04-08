@@ -5,8 +5,8 @@ import { Schema, model } from "mongoose"
 export interface IVideo {
     videoId: string,
     title: string,
-    description: string,
     publishDate: Date,
+    description?: string,
     caption?: string,
     duration?: string
 }
@@ -14,8 +14,8 @@ export interface IVideo {
 const videoSchema = new Schema<IVideo>({
     videoId: {type: String, required: true},
     title: {type: String, required: true},
-    description: {type: String, required: true},
     publishDate: {type: Date, required: true},
+    description: String,
     caption: String,
     duration: String,
 
