@@ -12,6 +12,8 @@ async function main() {
 
     const youtubeController = container.get<IYouTubeController>(tokens.YouTubeController);
     youtubeController.updateVideoList(true);
+
+    process.exit(0);
 }
 
 // Run at start of app
