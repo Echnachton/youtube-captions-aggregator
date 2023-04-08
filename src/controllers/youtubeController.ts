@@ -6,9 +6,15 @@ import { youtube_v3 } from "googleapis";
 import { Video } from "../models/Video";
 import { GaxiosPromise, GaxiosResponse } from "gaxios";
 import type { youtubePlaylistItemsParams } from "../../types/common";
+import * as readline from "readline";
+
+export interface IYouTubeController {
+    updateVideoList: (updateAll: boolean) => Promise<void>;
+}
 
 @injectable()
-export class YouTubeController {
+export class YouTubeController implements IYouTubeController {
+    private _count = 0;
     constructor(
         @inject(tokens.YouTubeService) private readonly _youtubeService: IYouTubeService,
         @inject(tokens.ApplicationParams) private readonly _applicationParams: IApplicationParameters
@@ -28,6 +34,7 @@ export class YouTubeController {
 
         try {
             this.processPlaylistItemList(initialList.data.items, updateAll);
+            this.count();
         } catch (e) {
             console.error(e);
         }
@@ -38,6 +45,7 @@ export class YouTubeController {
                 const nextList = await this.fetchNextList(nextPageToken);
                 this.processPlaylistItemList(nextList.data.items, updateAll);
                 nextPageToken = nextList.data.nextPageToken ?? null;
+                this.count();
             }
         } catch (e) {
             console.error(e);
@@ -83,4 +91,11 @@ export class YouTubeController {
 
         await video.save();
     }
+
+    private count(): void {
+        readline.clearLine(process.stdout, 0);
+        readline.cursorTo(process.stdout, 0);
+        process.stdout.write(this._count.toString());
+        this._count++;
+    } 
 }
