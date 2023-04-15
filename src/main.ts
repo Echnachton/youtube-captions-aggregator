@@ -11,6 +11,9 @@ async function main() {
     // Initialization
     await init();
 
+    await updateVideoList(false);
+
+    console.log("Process exited successfully");
     process.exit(0);
 }
 

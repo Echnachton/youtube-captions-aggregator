@@ -34,7 +34,10 @@ export class YouTubeController implements IYouTubeController {
         }
 
         try {
-            this.processPlaylistItemList(initialList.data.items, updateAll);
+            const message = await this.processPlaylistItemList(initialList.data.items, updateAll);
+            if (message === 1) {
+                return;
+            }
             this.count();
         } catch (e) {
             console.error(e);
@@ -45,9 +48,11 @@ export class YouTubeController implements IYouTubeController {
             let nextPageToken: string | null = initialList.data.nextPageToken;
             while (nextPageToken) {
                 const nextList = await this.fetchNextList(nextPageToken);
-                this.processPlaylistItemList(nextList.data.items, updateAll);
+                const message = await this.processPlaylistItemList(nextList.data.items, updateAll);
+                if (message === 1) {
+                    return;
+                }
                 nextPageToken = nextList.data.nextPageToken ?? null;
-                this.count();
             }
         } catch (e) {
             console.error(e);
@@ -71,14 +76,19 @@ export class YouTubeController implements IYouTubeController {
         for (const item of items) {
             if (!updateAll) {
                 // If video already exists, exit the process
-                const isVideoAlreadyExists = await Video.exists({videoId: item.contentDetails.videoId});
+                const videoId = item.contentDetails.videoId;
+                const isVideoAlreadyExists = await Video.exists({videoId});
                 if (isVideoAlreadyExists) {
-                    return
+                    console.info(`Video with ID ${videoId} is already stored in the db`);
+                    // Tells parent function to exit early
+                    return 1;
                 }
             }
 
             this.saveVideo(item);
+            this.count();
         }
+        return 0;
     }
 
     private async saveVideo(item: youtube_v3.Schema$PlaylistItem): Promise<void> {
