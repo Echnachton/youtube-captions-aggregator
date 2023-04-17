@@ -2,5 +2,6 @@ export const tokens = {
     CredentialService: Symbol.for("CredentialService"),
     YouTubeService: Symbol.for("YouTubeService"),
     ApplicationParams: Symbol.for("ApplicationParams"),
-    YouTubeController: Symbol.for("YouTubeController")
+    YouTubeController: Symbol.for("YouTubeController"),
+    YouTubeCaptionService: Symbol.for("YouTubeCaptionService")
 }
