@@ -3,12 +3,12 @@
 import { Schema, model } from "mongoose"
 
 export interface IVideo {
-    videoId: string,
-    title: string,
-    publishDate: Date,
-    description?: string,
-    caption?: string,
-    duration?: string
+    videoId: string;
+    title: string;
+    publishDate: Date;
+    description?: string;
+    caption?: string;
+    duration?: string;
 }
 
 const videoSchema = new Schema<IVideo>({
