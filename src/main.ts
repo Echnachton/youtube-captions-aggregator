@@ -5,6 +5,9 @@ import type { ICredentialService } from "./services/credentialService";
 import mongoose from "mongoose";
 import type { IYouTubeController } from "./controllers/youtubeController";
 import { IYouTubeCaptionService } from "./services/youtubeCaptionService";
+import { Video } from "./models/Video";
+import { Caption } from "./models/Caption";
+import * as readline from "readline";
 
 dotenv.config();
 
@@ -12,11 +15,8 @@ async function main() {
     // Initialization
     await init();
 
-    // await updateVideoList(false);
-
     try {
-        const res = await getCaptions();
-        console.log(res);
+        await getCaptions();
     } catch(e) {
         console.error(e);
     }
@@ -49,8 +49,28 @@ async function updateVideoList(updateAll: boolean) {
 }
 
 async function getCaptions() {
+    const videos = await Video.find({});
     const youtubeCaptionService = container.get<IYouTubeCaptionService>(tokens.YouTubeCaptionService);
-    return youtubeCaptionService.getCaptions("go", "fr");
+    
+    let count = 0;
+    for (const video of videos) {
+        const captions = await youtubeCaptionService.getCaptions(video.videoId);
+        if (!captions) {
+            continue;
+        }
+        const caption = new Caption({
+            videoId: video.videoId,
+            caption: captions
+        });
+        caption.save();
+
+        // TODO: Refactor this and the count method into util
+        readline.clearLine(process.stdout, 0);
+        readline.cursorTo(process.stdout, 0);
+        process.stdout.write(count.toString());
+        count++;
+        await new Promise((resolve) => setTimeout(resolve, 1 * 1000));
+    }
 }
 
 main();

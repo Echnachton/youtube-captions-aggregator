@@ -1,5 +1,5 @@
 // This gets the captions from youtube
-// TODO: Refactor this
+// TODO: Refactor this. And better Error handling. In fact set the whole thing on fire.
 
 import { inject, injectable } from "inversify";
 import { tokens } from "../utils";
@@ -27,7 +27,12 @@ export class YouTubeCaptionService implements IYouTubeCaptionService {
         const axiosResponseVideoHTML = await this.fetch<string>(videoURL);
 
         // This extracts information about the captions inside the HTML
-        const captionURI = this.extractCaptionsBaseURI(axiosResponseVideoHTML.data);
+        let captionURI: URL;
+        try {
+            captionURI = this.extractCaptionsBaseURI(axiosResponseVideoHTML.data);
+        } catch {
+            return;
+        }
         
         // If target language code is set, it will try to get the captions in that language.
         // It may not be available
@@ -36,12 +41,30 @@ export class YouTubeCaptionService implements IYouTubeCaptionService {
         }
 
         // Fetches the captions
-        let axiosResponseCaptions = await this.fetch<string>(captionURI.toString());
+        let axiosResponseCaptions: AxiosResponse<string>;
+        try {
+            axiosResponseCaptions = await this.fetch<string>(captionURI.toString());
+        } catch {
+            return;
+        }
 
         // Parse the xml
-        const captionStream = this.parseXML(axiosResponseCaptions.data);
+        let captionStream: string
+        try {
+            this.parseXML(axiosResponseCaptions.data);
+        } catch {
+            return;
+        }
 
-        return this.decodeHTMLEntities(captionStream);
+        // Decodes the XML encoding
+        let captions: string;
+        try {
+            captions = this.decodeHTMLEntities(captionStream);
+        } catch {
+            return;
+        }
+
+        return captions;
     }
 
     private async fetch<T>(url: string): Promise<AxiosResponse<T>> {
@@ -57,12 +80,12 @@ export class YouTubeCaptionService implements IYouTubeCaptionService {
             axiosResponse = await axios.get(url, axiosOptions);
         } catch(e) {
             console.error(errorMsg);
-            Promise.reject(new Error(e));
+            return;
         }
 
         if (axiosResponse.status >= 400) {
             console.error(errorMsg);
-            Promise.reject(new Error(errorMsg));
+            return;
         }
 
         return axiosResponse;
@@ -70,22 +93,28 @@ export class YouTubeCaptionService implements IYouTubeCaptionService {
 
     private extractCaptionsBaseURI(data: string): URL {
         let captionUrl: URL;
+        let captionObject: IVideoCaptionInfo;
         try {
             const regex = /("captionTracks":.*isTranslatable":(true|false)}])/;
             const match = data.match(regex)[0];
-            const captionObject: IVideoCaptionInfo = JSON.parse(`{${match}}`);
+            captionObject = JSON.parse(`{${match}}`);
+        } catch(e) {
+            console.error(`Failed to extract captions. There might not be captions available`);
+            return;
+        }
 
+        try {
             captionUrl = new URL(captionObject.captionTracks[0].baseUrl);
         } catch(e) {
             console.error(`Failed to construct caption url`);
-            Promise.reject(new Error(e));
+            return;
         }
 
         return captionUrl;
     }
 
     private parseXML(data: string): string {
-        let captionStream: string;
+        let captionStream: string = '';
         try {
             const parser = new this._dom.window.DOMParser();
             const parsedXML = parser.parseFromString(data, "application/xml");
@@ -95,7 +124,7 @@ export class YouTubeCaptionService implements IYouTubeCaptionService {
             }
         } catch(e) {
             console.error(e);
-            Promise.reject(e);
+            return;
         }
 
         return captionStream;
